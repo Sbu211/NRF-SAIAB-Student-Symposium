@@ -1,107 +1,208 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Ripple Effect: Impactful Science</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            color: white; /* Ensures all text is white by default */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
         }
         header {
-            background-color: rgba(0, 0, 0, 0.5); /* Optional overlay for better text readability */
+            background-color: #003087;
+            color: white;
+            padding: 1em;
+            text-align: center;
         }
-        .speaker-img {
-            width: 150px;
-            height: 150px;
-            object-fit: cover;
+        nav {
+            background-color: #004aad;
+            padding: 1em;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            margin: 0 1em;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        .hero {
+            background-image: url('ocean-background.jpg');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 4em 1em;
+        }
+        .hero h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.5em;
+        }
+        .hero p {
+            font-size: 1.2em;
+            margin-bottom: 1em;
+        }
+        .hero a {
+            background-color: #007bff;
+            color: white;
+            padding: 0.8em 1.5em;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .hero a:hover {
+            background-color: #0056b3;
+        }
+        section {
+            padding: 2em;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .speakers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2em;
+            justify-content: center;
+        }
+        .speaker {
+            background-color: white;
+            padding: 1em;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+        .speaker img {
+            width: 100%;
+            border-radius: 5px;
+        }
+        .speaker h3 {
+            margin: 0.5em 0;
+        }
+        footer {
+            background-color: #003087;
+            color: white;
+            text-align: center;
+            padding: 1em;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+        footer a {
+            color: white;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-900">
-    <!-- Hero Section -->
-    <header class="bg-[url('https://raw.githubusercontent.com/Sbu211/NRF-SAIAB-Student-Symposium/main/background_images/Ripple_background_2.jpg')]" bg-cover bg-center text-white relative">
-        <!-- Replace with your actual GitHub background image URL -->
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-2xl font-bold">The National Research Foundation Student Symposium</div>
-            <div class="space-x-4">
-                <a href="#speakers" class="hover:text-gray-300">Speakers</a>
-                <a href="#about" class="hover:text-gray-300">About</a>
-                <a href="#apply" class="hover:text-gray-300">Apply</a>
-            </div>
+<body>
+    <header>
+        <h1>The National Research Foundation Student Symposium</h1>
+        <nav>
+            <a href="#speakers">Speakers</a>
+            <a href="#about">About</a>
+            <a href="#apply">Apply</a>
         </nav>
-        <div class="container mx-auto px-6 py-16 text-center">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">The Ripple Effect: Impactful Science</h1>
-            <p class="text-lg md:text-xl mb-6">Explore research with purpose — where aquatic scince meets tangible change.</p>
-            <a href="#apply" class="bg-red-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-600">Submit Your Abstract</a>
-        </div>
     </header>
 
-    <!-- Key Speakers Section -->
-    <section id="speakers" class="container mx-auto px-6 py-16 bg-gray-800 bg-opacity-80">
-        <h2 class="text-3xl font-bold text-center mb-12">Key Speakers</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="text-center bg-gray-700 p-6 rounded-lg shadow-md">
-                <img src="https://raw.githubusercontent.com/Sbu211/NRF-SAIAB-Student-Symposium/main/speaker_images/Prof_Dorrington.jpg" alt="Prof Dorrington" class="mx-auto mb-4 rounded-full speaker-img">
-                <!-- Replace with your actual GitHub speaker image URL -->
-                <h3 class="text-xl font-semibold mb-2">Professor R. Dorrington</h3>
-                <p class="text-gray-300">Professor Dorrington is based in the Department of Biochemistry and Microbiology at Rhodes University. As DST/RNF SARChI Professor in Marine Natural Products (MNPs) Research, Prof. Dorrington leads a large, multidisciplinary research group active across the broad field of marine biodiscovery, including marine biology, microbial ecology, microbial genomics through to marine natural products chemistry and antiviral bioassay development. </p>
+    <div class="hero">
+        <h1>The Ripple Effect: Impactful Science</h1>
+        <p>Explore research with purpose — where aquatic science meets tangible change.</p>
+        <a href="#apply">Submit Your Abstract</a>
+    </div>
+
+    <section id="speakers" class="speakers">
+        <h2>Key Speakers</h2>
+        <div class="speaker">
+            <img src="dorrington.jpg" alt="Professor R. Dorrington">
+            <h3>Professor R. Dorrington</h3>
+            <p>Professor Dorrington is based in the Department of Biochemistry and Microbiology at Rhodes University. As DST/RNF SARChI Professor in Marine Natural Products (MNPs) Research, Prof. Dorrington leads a large, multidisciplinary research group active across the broad field of marine biodiscovery, including marine biology, microbial ecology, microbial genomics through to marine natural products chemistry and antiviral bioassay development.</p>
+        </div>
+        <div class="speaker">
+            <img src="rajkaran.jpg" alt="Professor Anusha Rajkaran">
+            <h3>Professor Anusha Rajkaran</h3>
+            <p>Professor Anusha Rajkaran is based in the Department of Biodiversity and Conservation Biology at the University of the Western Cape. Her research explores the functioning of estuarine habitats, including salt marshes and seagrass, the ecosystem services they provide, and the impacts of microplastic and chemical pollutants. With work spanning much of South Africa’s coastline, she leads a dynamic research team of postgraduate students and postdoctoral fellows focused on understanding and protecting these vital ecosystems.</p>
+        </div>
+    </section>
+
+    <section id="about">
+        <h2>About the Symposium</h2>
+        <p>The Ripple Effect: Impactful Science is a premier symposium hosted by NRF-SAIAB, dedicated to advancing aquatic research and its real-world applications. Our mission is to bring together researchers, scientists, and environmental advocates to share innovative findings, foster interdisciplinary collaboration, and drive solutions for sustainable aquatic ecosystems. We aim to highlight research that not only advances scientific understanding but also creates measurable impacts on conservation, policy, and community engagement for the health of our planet’s oceans, rivers, and lakes.</p>
+    </section>
+
+    <section id="event-details">
+        <h2>Event Details</h2>
+        <div class="event-info">
+            <div>
+                <h3>Date</h3>
+                <p>November 21st, 2025</p>
             </div>
-            <div class="text-center bg-gray-700 p-6 rounded-lg shadow-md">
-                <img src="https://raw.githubusercontent.com/Sbu211/NRF-SAIAB-Student-Symposium/main/images/speaker2.jpg" alt="Prof. James Okoro" class="mx-auto mb-4 rounded-full speaker-img">
-                <!-- Replace with your actual GitHub speaker image URL -->
-                <h3 class="text-xl font-semibold mb-2">Professor Anusha Rajkaran</h3>
-                <p class="text-gray-300">Professor Anusha Rajkaran is based in the Department of Biodiversity and Conservation Biology at the University of the Western Cape. Her research explores the functioning of estuarine habitats, including salt marshes and seagrass, the ecosystem services they provide, and the impacts of microplastic and chemical pollutants. With work spanning much of South Africa’s coastline, she leads a dynamic research team of postgraduate students and postdoctoral fellows focused on understanding and protecting these vital ecosystems.</p>
+            <div>
+                <h3>Venue</h3>
+                <p>Eden Grove Blue Lecture Theatre, Rhodes University, Makhanda, South Africa, 6139</p>
             </div>
         </div>
     </section>
 
-    <!-- About the Symposium Section -->
-    <section id="about" class="container mx-auto px-6 py-16 bg-gray-800 bg-opacity-80">
-        <h2 class="text-3xl font-bold text-center mb-8">About the Symposium</h2>
-        <p class="text-lg text-gray-300 text-center max-w-3xl mx-auto">
-            The Ripple Effect: Impactful Science is a premier symposium hosted by NRF-SAIAB, dedicated to advancing aquatic research and its real-world applications. Our mission is to bring together researchers, scientists, and environmental advocates to share innovative findings, foster interdisciplinary collaboration, and drive solutions for sustainable aquatic ecosystems. We aim to highlight research that not only advances scientific understanding but also creates measurable impacts on conservation, policy, and community engagement for the health of our planet’s oceans, rivers, and lakes.
+    <section id="apply">
+        <h2>Submit Your Abstract</h2>
+        <p><strong>Deadline: 17 October 2025</strong></p>
+        <p>Share your research with a clear 'why' – explain its necessity and tangible outcomes.</p>
+        <a href="application-form.html">Go to Application Form</a>
+        <p><strong>Deadline: 17 October 2025</strong></p>
+    </section>
+
+    <footer>
+        <p>© 2025 The Ripple Effect: Impactful Science. All rights reserved.</p>
+        <p>
+            <a href="privacy-policy.html">Privacy Policy</a> |
+            <a href="mailto:G.Matcher@saiab.nrf.ac.za">Contact Us: G.Matcher@saiab.nrf.ac.za</a>
         </p>
-    </section>
-
-    <!-- Event Details Section -->
-    <section class="bg-gray-900 py-16">
-        <div class="container mx-auto px-6 text-center">
-            <h2 class="text-3xl font-bold mb-8">Event Details</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto">
-                <div class="bg-gray-700 p-6 rounded-lg shadow-md">
-                    <h3 class="text-xl font-semibold mb-2">Date</h3>
-                    <p class="text-gray-300">November 21st, 2025</p>
-                    <!-- Replace with your actual event date -->
-                </div>
-                <div class="bg-gray-700 p-6 rounded-lg shadow-md">
-                    <h3 class="text-xl font-semibold mb-2">Venue</h3>
-                    <p class="text-gray-300">Eden Grove Blue Lecture Theatre,Rhodes University, Makhanda, South Africa, 6139</p>
-                    <!-- Replace with your actual venue -->
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Call to Action Section -->
-    <section id="apply" class="container mx-auto px-6 py-16 text-center bg-gray-800 bg-opacity-80">
-        <h2 class="text-3xl font-bold mb-4">Submit Your Abstract</h2>
-        <p class="text-lg mb-6">Share your research with a clear 'why' – explain its necessity and tangible outcomes.</p>
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSeEfznmvmDOvNGExt6fqQhUhqaFQkFxyTeAKgpc_fTEujPhqg/viewform" target="_blank" class="bg-blue-500 text-white px-6 py-3 roundedhttps-full font-semibold hover:bg-blue-600">Go to Application Form</a>
-        <!-- Replace with your actual Google Form URL -->
-    </section>
-
-    <!-- Footer -->
-    <section class="bg-gray-900 py-8">
-        <div class="container mx-auto px-6 text-center">
-            <p>&copy; 2025 The Ripple Effect: Impactful Science. All rights reserved.</p>
-            <div class="mt-4 space-x-4">
-                <a href="https://nrf-saiab.ac.za/privacy-policy" class="hover:text-gray-300">Privacy Policy</a>
-                <a href="/cdn-cgi/l/email-protection#9af9f5f4eefbf9eedaf4e8fcb7e9fbf3fbf8b7e9e3f7eaf5e9f3eff7b4f5e8fd" class="hover:text-gray-300">Contact Us : G.Matcher@saiab.nrf.ac.za</a>
-                <!-- Replace Privacy Policy with your actual URL; Contact Us uses example email -->
-            </div>
-        </div>
-    </section>
+    </footer>
 </body>
 </html>
